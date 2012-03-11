@@ -734,16 +734,16 @@ class _DefaultPathFinder(PathFinder):
     def _path_hooks(cls, path):
         u"""Search sys.path_hooks as well as implicit path hooks."""
         try:
-            return super(cls.__class__, cls)._path_hooks(path)
+            return super(cls, cls)._path_hooks(path)
         except ImportError:
             implicit_hooks = [_DEFAULT_PATH_HOOK, imp.NullImporter]
-            return super(cls.__class__, cls)._path_hooks(path, implicit_hooks)
+            return super(cls, cls)._path_hooks(path, implicit_hooks)
 
     @classmethod
     def _path_importer_cache(cls, path):
         u"""Use the default path hook when None is stored in
         sys.path_importer_cache."""
-        return super(cls.__class__, cls)._path_importer_cache(path, _DEFAULT_PATH_HOOK)
+        return super(cls, cls)._path_importer_cache(path, _DEFAULT_PATH_HOOK)
 
 
 class _ImportLockContext(object):
