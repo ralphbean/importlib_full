@@ -812,7 +812,7 @@ class AbstractMethodImplTests(unittest.TestCase):
     def raises_NotImplementedError(self, ins, *args):
         for method_name in args:
             method = getattr(ins, method_name)
-            arg_count = len(inspect.getfullargspec(method)[0]) - 1
+            arg_count = len(inspect.getargspec(method)[0]) - 1
             args = [''] * arg_count
             try:
                 method(*args)
