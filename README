@@ -1,0 +1,11 @@
+Purpose
+=======
+
+This package contains an attempt to backport *all* the code from importlib as
+found in Python 3.2.  It is provided for people who wish to use sane import
+machinery but who are stuck running in Python 2 or who wish to build packages
+that are both Python 2 and Python 3 compatible.
+
+For documentation, see the `importlib docs`_ for Python 3.2.
+
+.. _importlib docs: http://docs.python.org/py3k/library/importlib.html
