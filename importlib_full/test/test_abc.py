@@ -13,7 +13,7 @@ class InheritanceTests(object):
     superclasses = []
 
     def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(InheritanceTests, self).__init__(*args, **kwargs)
         assert self.subclasses or self.superclasses, self.__class__
         self.__test = getattr(abc, self.__class__.__name__)
 
