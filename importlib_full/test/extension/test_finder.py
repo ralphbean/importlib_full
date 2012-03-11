@@ -6,7 +6,7 @@ import unittest
 
 class FinderTests(abc.FinderTests):
 
-    """Test the finder for extension modules."""
+    u"""Test the finder for extension modules."""
 
     def find_module(self, fullname):
         importer = _bootstrap._FileFinder(util.PATH,
@@ -33,15 +33,15 @@ class FinderTests(abc.FinderTests):
         pass
 
     def test_failure(self):
-        self.assertTrue(self.find_module('asdfjkl;') is None)
+        self.assertTrue(self.find_module(u'asdfjkl;') is None)
 
     # XXX Raise an exception if someone tries to use the 'path' argument?
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(FinderTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

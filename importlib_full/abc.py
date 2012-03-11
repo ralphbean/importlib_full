@@ -1,4 +1,4 @@
-"""Abstract base classes related to import."""
+u"""Abstract base classes related to import."""
 from . import _bootstrap
 from . import machinery
 from . import util
@@ -13,24 +13,26 @@ import types
 import warnings
 
 
-class Loader(metaclass=abc.ABCMeta):
+class Loader():
 
-    """Abstract base class for import loaders."""
+    __metaclass__ = abc.ABCMeta
+    u"""Abstract base class for import loaders."""
 
     @abc.abstractmethod
     def load_module(self, fullname):
-        """Abstract method which when implemented should load a module.
+        u"""Abstract method which when implemented should load a module.
         The fullname is a str."""
         raise NotImplementedError
 
 
-class Finder(metaclass=abc.ABCMeta):
+class Finder():
 
-    """Abstract base class for import finders."""
+    __metaclass__ = abc.ABCMeta
+    u"""Abstract base class for import finders."""
 
     @abc.abstractmethod
     def find_module(self, fullname, path=None):
-        """Abstract method which when implemented should find a module.
+        u"""Abstract method which when implemented should find a module.
         The fullname is a str and the optional path is a str or None.
         Returns a Loader object.
         """
@@ -43,7 +45,7 @@ Finder.register(machinery.PathFinder)
 
 class ResourceLoader(Loader):
 
-    """Abstract base class for loaders which can return data from their
+    u"""Abstract base class for loaders which can return data from their
     back-end storage.
 
     This ABC represents one of the optional protocols specified by PEP 302.
@@ -52,14 +54,14 @@ class ResourceLoader(Loader):
 
     @abc.abstractmethod
     def get_data(self, path):
-        """Abstract method which when implemented should return the bytes for
+        u"""Abstract method which when implemented should return the bytes for
         the specified path.  The path must be a str."""
         raise NotImplementedError
 
 
 class InspectLoader(Loader):
 
-    """Abstract base class for loaders which support inspection about the
+    u"""Abstract base class for loaders which support inspection about the
     modules they can load.
 
     This ABC represents one of the optional protocols specified by PEP 302.
@@ -68,19 +70,19 @@ class InspectLoader(Loader):
 
     @abc.abstractmethod
     def is_package(self, fullname):
-        """Abstract method which when implemented should return whether the
+        u"""Abstract method which when implemented should return whether the
         module is a package.  The fullname is a str.  Returns a bool."""
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_code(self, fullname):
-        """Abstract method which when implemented should return the code object
+        u"""Abstract method which when implemented should return the code object
         for the module.  The fullname is a str.  Returns a types.CodeType."""
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_source(self, fullname):
-        """Abstract method which should return the source code for the
+        u"""Abstract method which should return the source code for the
         module.  The fullname is a str.  Returns a str."""
         raise NotImplementedError
 
@@ -90,7 +92,7 @@ InspectLoader.register(machinery.FrozenImporter)
 
 class ExecutionLoader(InspectLoader):
 
-    """Abstract base class for loaders that wish to support the execution of
+    u"""Abstract base class for loaders that wish to support the execution of
     modules as scripts.
 
     This ABC represents one of the optional protocols specified in PEP 302.
@@ -99,14 +101,14 @@ class ExecutionLoader(InspectLoader):
 
     @abc.abstractmethod
     def get_filename(self, fullname):
-        """Abstract method which should return the value that __file__ is to be
+        u"""Abstract method which should return the value that __file__ is to be
         set to."""
         raise NotImplementedError
 
 
 class SourceLoader(_bootstrap.SourceLoader, ResourceLoader, ExecutionLoader):
 
-    """Abstract base class for loading source code (and optionally any
+    u"""Abstract base class for loading source code (and optionally any
     corresponding bytecode).
 
     To support loading from source code, the abstractmethods inherited from
@@ -122,11 +124,11 @@ class SourceLoader(_bootstrap.SourceLoader, ResourceLoader, ExecutionLoader):
     """
 
     def path_mtime(self, path):
-        """Return the (int) modification time for the path (str)."""
+        u"""Return the (int) modification time for the path (str)."""
         raise NotImplementedError
 
     def set_data(self, path, data):
-        """Write the bytes to the path (if possible).
+        u"""Write the bytes to the path (if possible).
 
         Accepts a str path and data as bytes.
 
@@ -140,7 +142,7 @@ class SourceLoader(_bootstrap.SourceLoader, ResourceLoader, ExecutionLoader):
 
 class PyLoader(SourceLoader):
 
-    """Implement the deprecated PyLoader ABC in terms of SourceLoader.
+    u"""Implement the deprecated PyLoader ABC in terms of SourceLoader.
 
     This class has been deprecated! It is slated for removal in Python 3.4.
     If compatibility with Python 3.1 is not needed then implement the
@@ -177,12 +179,12 @@ class PyLoader(SourceLoader):
 
     @abc.abstractmethod
     def source_path(self, fullname):
-        """Abstract method.  Accepts a str module name and returns the path to
+        u"""Abstract method.  Accepts a str module name and returns the path to
         the source code for the module."""
         raise NotImplementedError
 
     def get_filename(self, fullname):
-        """Implement get_filename in terms of source_path.
+        u"""Implement get_filename in terms of source_path.
 
         As get_filename should only return a source file path there is no
         chance of the path not existing but loading still being possible, so
@@ -190,11 +192,11 @@ class PyLoader(SourceLoader):
         None.
 
         """
-        warnings.warn("importlib_full.abc.PyLoader is deprecated and is "
-                            "slated for removal in Python 3.4; "
-                            "use SourceLoader instead. "
-                            "See the importlib_full documentation on how to be "
-                            "compatible with Python 3.1 onwards.",
+        warnings.warn(u"importlib_full.abc.PyLoader is deprecated and is "
+                            u"slated for removal in Python 3.4; "
+                            u"use SourceLoader instead. "
+                            u"See the importlib_full documentation on how to be "
+                            u"compatible with Python 3.1 onwards.",
                         PendingDeprecationWarning)
         path = self.source_path(fullname)
         if path is None:
@@ -205,7 +207,7 @@ class PyLoader(SourceLoader):
 
 class PyPycLoader(PyLoader):
 
-    """Abstract base class to assist in loading source and bytecode by
+    u"""Abstract base class to assist in loading source and bytecode by
     requiring only back-end storage methods to be implemented.
 
     This class has been deprecated! Removal is slated for Python 3.4. Implement
@@ -218,22 +220,22 @@ class PyPycLoader(PyLoader):
     """
 
     def get_filename(self, fullname):
-        """Return the source or bytecode file path."""
+        u"""Return the source or bytecode file path."""
         path = self.source_path(fullname)
         if path is not None:
             return path
         path = self.bytecode_path(fullname)
         if path is not None:
             return path
-        raise ImportError("no source or bytecode path available for "
-                            "{0!r}".format(fullname))
+        raise ImportError(u"no source or bytecode path available for "
+                            u"{0!r}".format(fullname))
 
     def get_code(self, fullname):
-        """Get a code object from source or bytecode."""
-        warnings.warn("importlib_full.abc.PyPycLoader is deprecated and slated for "
-                            "removal in Python 3.4; use SourceLoader instead. "
-                            "If Python 3.1 compatibility is required, see the "
-                            "latest documentation for PyLoader.",
+        u"""Get a code object from source or bytecode."""
+        warnings.warn(u"importlib_full.abc.PyPycLoader is deprecated and slated for "
+                            u"removal in Python 3.4; use SourceLoader instead. "
+                            u"If Python 3.1 compatibility is required, see the "
+                            u"latest documentation for PyLoader.",
                         PendingDeprecationWarning)
         source_timestamp = self.source_mtime(fullname)
         # Try to use bytecode if it is available.
@@ -243,20 +245,20 @@ class PyPycLoader(PyLoader):
             try:
                 magic = data[:4]
                 if len(magic) < 4:
-                    raise ImportError("bad magic number in {}".format(fullname))
+                    raise ImportError(u"bad magic number in {}".format(fullname))
                 raw_timestamp = data[4:8]
                 if len(raw_timestamp) < 4:
-                    raise EOFError("bad timestamp in {}".format(fullname))
+                    raise EOFError(u"bad timestamp in {}".format(fullname))
                 pyc_timestamp = marshal._r_long(raw_timestamp)
                 bytecode = data[8:]
                 # Verify that the magic number is valid.
                 if imp.get_magic() != magic:
-                    raise ImportError("bad magic number in {}".format(fullname))
+                    raise ImportError(u"bad magic number in {}".format(fullname))
                 # Verify that the bytecode is not stale (only matters when
                 # there is source to fall back on.
                 if source_timestamp:
                     if pyc_timestamp < source_timestamp:
-                        raise ImportError("bytecode is stale")
+                        raise ImportError(u"bytecode is stale")
             except (ImportError, EOFError):
                 # If source is available give it a shot.
                 if source_timestamp is not None:
@@ -267,15 +269,15 @@ class PyPycLoader(PyLoader):
                 # Bytecode seems fine, so try to use it.
                 return marshal.loads(bytecode)
         elif source_timestamp is None:
-            raise ImportError("no source or bytecode available to create code "
-                                "object for {0!r}".format(fullname))
+            raise ImportError(u"no source or bytecode available to create code "
+                                u"object for {0!r}".format(fullname))
         # Use the source.
         source_path = self.source_path(fullname)
         if source_path is None:
-            message = "a source path must exist to load {0}".format(fullname)
+            message = u"a source path must exist to load {0}".format(fullname)
             raise ImportError(message)
         source = self.get_data(source_path)
-        code_object = compile(source, source_path, 'exec', dont_inherit=True)
+        code_object = compile(source, source_path, u'exec', dont_inherit=True)
         # Generate bytecode and write it out.
         if not sys.dont_write_bytecode:
             data = bytearray(imp.get_magic())
@@ -286,19 +288,19 @@ class PyPycLoader(PyLoader):
 
     @abc.abstractmethod
     def source_mtime(self, fullname):
-        """Abstract method. Accepts a str filename and returns an int
+        u"""Abstract method. Accepts a str filename and returns an int
         modification time for the source of the module."""
         raise NotImplementedError
 
     @abc.abstractmethod
     def bytecode_path(self, fullname):
-        """Abstract method. Accepts a str filename and returns the str pathname
+        u"""Abstract method. Accepts a str filename and returns the str pathname
         to the bytecode for the module."""
         raise NotImplementedError
 
     @abc.abstractmethod
     def write_bytecode(self, fullname, bytecode):
-        """Abstract method.  Accepts a str filename and bytes object
+        u"""Abstract method.  Accepts a str filename and bytes object
         representing the bytecode for the module.  Returns a boolean
         representing whether the bytecode was written or not."""
         raise NotImplementedError

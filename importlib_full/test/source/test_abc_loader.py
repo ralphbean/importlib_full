@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import importlib_full
 from importlib_full import abc
 
@@ -19,8 +20,8 @@ import warnings
 class SourceOnlyLoaderMock(abc.SourceLoader):
 
     # Globals that should be defined for all modules.
-    source = (b"_ = '::'.join([__name__, __file__, __cached__, __package__, "
-              b"repr(__loader__)])")
+    source = ("_ = '::'.join([__name__, __file__, __cached__, __package__, "
+              "repr(__loader__)])")
 
     def __init__(self, path):
         self.path = path
@@ -38,19 +39,19 @@ class SourceLoaderMock(SourceOnlyLoaderMock):
     source_mtime = 1
 
     def __init__(self, path, magic=imp.get_magic()):
-        super().__init__(path)
+        super(self.__class__, self).__init__(path)
         self.bytecode_path = imp.cache_from_source(self.path)
         data = bytearray(magic)
         data.extend(marshal._w_long(self.source_mtime))
-        code_object = compile(self.source, self.path, 'exec',
+        code_object = compile(self.source, self.path, u'exec',
                                 dont_inherit=True)
         data.extend(marshal.dumps(code_object))
-        self.bytecode = bytes(data)
+        self.bytecode = str(data)
         self.written = {}
 
     def get_data(self, path):
         if path == self.path:
-            return super().get_data(path)
+            return super(self.__class__, self).get_data(path)
         elif path == self.bytecode_path:
             return self.bytecode
         else:
@@ -61,25 +62,25 @@ class SourceLoaderMock(SourceOnlyLoaderMock):
         return self.source_mtime
 
     def set_data(self, path, data):
-        self.written[path] = bytes(data)
+        self.written[path] = str(data)
         return path == self.bytecode_path
 
 
 class PyLoaderMock(abc.PyLoader):
 
     # Globals that should be defined for all modules.
-    source = (b"_ = '::'.join([__name__, __file__, __package__, "
-              b"repr(__loader__)])")
+    source = ("_ = '::'.join([__name__, __file__, __package__, "
+              "repr(__loader__)])")
 
     def __init__(self, data):
-        """Take a dict of 'module_name: path' pairings.
+        u"""Take a dict of 'module_name: path' pairings.
 
         Paths should have no file extension, allowing packages to be denoted by
         ending in '__init__'.
 
         """
         self.module_paths = data
-        self.path_to_module = {val:key for key,val in data.items()}
+        self.path_to_module = dict((val, key) for key,val in data.items())
 
     def get_data(self, path):
         if path not in self.path_to_module:
@@ -88,7 +89,7 @@ class PyLoaderMock(abc.PyLoader):
 
     def is_package(self, name):
         filename = os.path.basename(self.get_filename(name))
-        return os.path.splitext(filename)[0] == '__init__'
+        return os.path.splitext(filename)[0] == u'__init__'
 
     def source_path(self, name):
         try:
@@ -97,10 +98,10 @@ class PyLoaderMock(abc.PyLoader):
             raise ImportError
 
     def get_filename(self, name):
-        """Silence deprecation warning."""
+        u"""Silence deprecation warning."""
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            path = super().get_filename(name)
+            warnings.simplefilter(u"always")
+            path = super(self.__class__, self).get_filename(name)
             assert len(w) == 1
             assert issubclass(w[0].category, PendingDeprecationWarning)
             return path
@@ -108,7 +109,7 @@ class PyLoaderMock(abc.PyLoader):
 
 class PyLoaderCompatMock(PyLoaderMock):
 
-    """Mock that matches what is suggested to have a loader that is compatible
+    u"""Mock that matches what is suggested to have a loader that is compatible
     from Python 3.1 onwards."""
 
     def get_filename(self, fullname):
@@ -129,7 +130,7 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
     default_mtime = 1
 
     def __init__(self, source, bc={}):
-        """Initialize mock.
+        u"""Initialize mock.
 
         'bc' is a dict keyed on a module's name. The value is dict with
         possible keys of 'path', 'mtime', 'magic', and 'bc'. Except for 'path',
@@ -137,24 +138,24 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
         deviate from default values.
 
         """
-        super().__init__(source)
+        super(self.__class__, self).__init__(source)
         self.module_bytecode = {}
         self.path_to_bytecode = {}
         self.bytecode_to_path = {}
         for name, data in bc.items():
-            self.path_to_bytecode[data['path']] = name
-            self.bytecode_to_path[name] = data['path']
-            magic = data.get('magic', imp.get_magic())
-            mtime = importlib_full._w_long(data.get('mtime', self.default_mtime))
-            if 'bc' in data:
-                bc = data['bc']
+            self.path_to_bytecode[data[u'path']] = name
+            self.bytecode_to_path[name] = data[u'path']
+            magic = data.get(u'magic', imp.get_magic())
+            mtime = importlib_full._w_long(data.get(u'mtime', self.default_mtime))
+            if u'bc' in data:
+                bc = data[u'bc']
             else:
                 bc = self.compile_bc(name)
             self.module_bytecode[name] = magic + mtime + bc
 
     def compile_bc(self, name):
-        source_path = self.module_paths.get(name, '<test>') or '<test>'
-        code = compile(self.source, source_path, 'exec')
+        source_path = self.module_paths.get(name, u'<test>') or u'<test>'
+        code = compile(self.source, source_path, u'exec')
         return marshal.dumps(code)
 
     def source_mtime(self, name):
@@ -180,7 +181,7 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
 
     def get_data(self, path):
         if path in self.path_to_module:
-            return super().get_data(path)
+            return super(self.__class__, self).get_data(path)
         elif path in self.path_to_bytecode:
             name = self.path_to_bytecode[path]
             return self.module_bytecode[name]
@@ -189,21 +190,21 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
 
     def is_package(self, name):
         try:
-            return super().is_package(name)
+            return super(self.__class__, self).is_package(name)
         except TypeError:
-            return '__init__' in self.bytecode_to_path[name]
+            return u'__init__' in self.bytecode_to_path[name]
 
     def get_code(self, name):
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            code_object = super().get_code(name)
+            warnings.simplefilter(u"always")
+            code_object = super(self.__class__, self).get_code(name)
             assert len(w) == 1
             assert issubclass(w[0].category, PendingDeprecationWarning)
             return code_object
 
 class PyLoaderTests(testing_abc.LoaderTests):
 
-    """Tests for importlib_full.abc.PyLoader."""
+    u"""Tests for importlib_full.abc.PyLoader."""
 
     mocker = PyLoaderMock
 
@@ -211,23 +212,23 @@ class PyLoaderTests(testing_abc.LoaderTests):
         for attr, val in kwargs.items():
             found = getattr(ob, attr)
             self.assertEqual(found, val,
-                    "{} attribute: {} != {}".format(attr, found, val))
+                    u"{} attribute: {} != {}".format(attr, found, val))
 
     def test_module(self):
-        name = '<module>'
-        path = os.path.join('', 'path', 'to', 'module')
+        name = u'<module>'
+        path = os.path.join(u'', u'path', u'to', u'module')
         mock = self.mocker({name: path})
         with util.uncache(name):
             module = mock.load_module(name)
             self.assertTrue(name in sys.modules)
-        self.eq_attrs(module, __name__=name, __file__=path, __package__='',
+        self.eq_attrs(module, __name__=name, __file__=path, __package__=u'',
                         __loader__=mock)
-        self.assertTrue(not hasattr(module, '__path__'))
+        self.assertTrue(not hasattr(module, u'__path__'))
         return mock, name
 
     def test_package(self):
-        name = '<pkg>'
-        path = os.path.join('path', 'to', name, '__init__')
+        name = u'<pkg>'
+        path = os.path.join(u'path', u'to', name, u'__init__')
         mock = self.mocker({name: path})
         with util.uncache(name):
             module = mock.load_module(name)
@@ -238,20 +239,20 @@ class PyLoaderTests(testing_abc.LoaderTests):
         return mock, name
 
     def test_lacking_parent(self):
-        name = 'pkg.mod'
-        path = os.path.join('path', 'to', 'pkg', 'mod')
+        name = u'pkg.mod'
+        path = os.path.join(u'path', u'to', u'pkg', u'mod')
         mock = self.mocker({name: path})
         with util.uncache(name):
             module = mock.load_module(name)
             self.assertIn(name, sys.modules)
-        self.eq_attrs(module, __name__=name, __file__=path, __package__='pkg',
+        self.eq_attrs(module, __name__=name, __file__=path, __package__=u'pkg',
                         __loader__=mock)
-        self.assertFalse(hasattr(module, '__path__'))
+        self.assertFalse(hasattr(module, u'__path__'))
         return mock, name
 
     def test_module_reuse(self):
-        name = 'mod'
-        path = os.path.join('path', 'to', 'mod')
+        name = u'mod'
+        path = os.path.join(u'path', u'to', u'mod')
         module = imp.new_module(name)
         mock = self.mocker({name: path})
         with util.uncache(name):
@@ -262,23 +263,23 @@ class PyLoaderTests(testing_abc.LoaderTests):
         return mock, name
 
     def test_state_after_failure(self):
-        name = "mod"
+        name = u"mod"
         module = imp.new_module(name)
         module.blah = None
-        mock = self.mocker({name: os.path.join('path', 'to', 'mod')})
-        mock.source = b"1/0"
+        mock = self.mocker({name: os.path.join(u'path', u'to', u'mod')})
+        mock.source = "1/0"
         with util.uncache(name):
             sys.modules[name] = module
             with self.assertRaises(ZeroDivisionError):
                 mock.load_module(name)
             self.assertTrue(sys.modules[name] is module)
-            self.assertTrue(hasattr(module, 'blah'))
+            self.assertTrue(hasattr(module, u'blah'))
         return mock
 
     def test_unloadable(self):
-        name = "mod"
-        mock = self.mocker({name: os.path.join('path', 'to', 'mod')})
-        mock.source = b"1/0"
+        name = u"mod"
+        mock = self.mocker({name: os.path.join(u'path', u'to', u'mod')})
+        mock.source = "1/0"
         with util.uncache(name):
             with self.assertRaises(ZeroDivisionError):
                 mock.load_module(name)
@@ -288,7 +289,7 @@ class PyLoaderTests(testing_abc.LoaderTests):
 
 class PyLoaderCompatTests(PyLoaderTests):
 
-    """Test that the suggested code to make a loader that is compatible from
+    u"""Test that the suggested code to make a loader that is compatible from
     Python 3.1 forward works."""
 
     mocker = PyLoaderCompatMock
@@ -296,33 +297,33 @@ class PyLoaderCompatTests(PyLoaderTests):
 
 class PyLoaderInterfaceTests(unittest.TestCase):
 
-    """Tests for importlib_full.abc.PyLoader to make sure that when source_path()
+    u"""Tests for importlib_full.abc.PyLoader to make sure that when source_path()
     doesn't return a path everything works as expected."""
 
     def test_no_source_path(self):
         # No source path should lead to ImportError.
-        name = 'mod'
+        name = u'mod'
         mock = PyLoaderMock({})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.load_module(name)
 
     def test_source_path_is_None(self):
-        name = 'mod'
+        name = u'mod'
         mock = PyLoaderMock({name: None})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.load_module(name)
 
     def test_get_filename_with_source_path(self):
         # get_filename() should return what source_path() returns.
-        name = 'mod'
-        path = os.path.join('path', 'to', 'source')
+        name = u'mod'
+        path = os.path.join(u'path', u'to', u'source')
         mock = PyLoaderMock({name: path})
         with util.uncache(name):
             self.assertEqual(mock.get_filename(name), path)
 
     def test_get_filename_no_source_path(self):
         # get_filename() should raise ImportError if source_path returns None.
-        name = 'mod'
+        name = u'mod'
         mock = PyLoaderMock({name: None})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.get_filename(name)
@@ -330,7 +331,7 @@ class PyLoaderInterfaceTests(unittest.TestCase):
 
 class PyPycLoaderTests(PyLoaderTests):
 
-    """Tests for importlib_full.abc.PyPycLoader."""
+    u"""Tests for importlib_full.abc.PyPycLoader."""
 
     mocker = PyPycLoaderMock
 
@@ -346,35 +347,35 @@ class PyPycLoaderTests(PyLoaderTests):
         self.assertEqual(bc, mock.compile_bc(name))
 
     def test_module(self):
-        mock, name = super().test_module()
+        mock, name = super(self.__class__, self).test_module()
         self.verify_bytecode(mock, name)
 
     def test_package(self):
-        mock, name = super().test_package()
+        mock, name = super(self.__class__, self).test_package()
         self.verify_bytecode(mock, name)
 
     def test_lacking_parent(self):
-        mock, name = super().test_lacking_parent()
+        mock, name = super(self.__class__, self).test_lacking_parent()
         self.verify_bytecode(mock, name)
 
     def test_module_reuse(self):
-        mock, name = super().test_module_reuse()
+        mock, name = super(self.__class__, self).test_module_reuse()
         self.verify_bytecode(mock, name)
 
     def test_state_after_failure(self):
-        super().test_state_after_failure()
+        super(self.__class__, self).test_state_after_failure()
 
     def test_unloadable(self):
-        super().test_unloadable()
+        super(self.__class__, self).test_unloadable()
 
 
 class PyPycLoaderInterfaceTests(unittest.TestCase):
 
-    """Test for the interface of importlib_full.abc.PyPycLoader."""
+    u"""Test for the interface of importlib_full.abc.PyPycLoader."""
 
     def get_filename_check(self, src_path, bc_path, expect):
-        name = 'mod'
-        mock = PyPycLoaderMock({name: src_path}, {name: {'path': bc_path}})
+        name = u'mod'
+        mock = PyPycLoaderMock({name: src_path}, {name: {u'path': bc_path}})
         with util.uncache(name):
             assert mock.source_path(name) == src_path
             assert mock.bytecode_path(name) == bc_path
@@ -382,33 +383,33 @@ class PyPycLoaderInterfaceTests(unittest.TestCase):
 
     def test_filename_with_source_bc(self):
         # When source and bytecode paths present, return the source path.
-        self.get_filename_check('source_path', 'bc_path', 'source_path')
+        self.get_filename_check(u'source_path', u'bc_path', u'source_path')
 
     def test_filename_with_source_no_bc(self):
         # With source but no bc, return source path.
-        self.get_filename_check('source_path', None, 'source_path')
+        self.get_filename_check(u'source_path', None, u'source_path')
 
     def test_filename_with_no_source_bc(self):
         # With not source but bc, return the bc path.
-        self.get_filename_check(None, 'bc_path', 'bc_path')
+        self.get_filename_check(None, u'bc_path', u'bc_path')
 
     def test_filename_with_no_source_or_bc(self):
         # With no source or bc, raise ImportError.
-        name = 'mod'
-        mock = PyPycLoaderMock({name: None}, {name: {'path': None}})
+        name = u'mod'
+        mock = PyPycLoaderMock({name: None}, {name: {u'path': None}})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.get_filename(name)
 
 
 class SkipWritingBytecodeTests(unittest.TestCase):
 
-    """Test that bytecode is properly handled based on
+    u"""Test that bytecode is properly handled based on
     sys.dont_write_bytecode."""
 
     @source_util.writes_bytecode_files
     def run_test(self, dont_write_bytecode):
-        name = 'mod'
-        mock = PyPycLoaderMock({name: os.path.join('path', 'to', 'mod')})
+        name = u'mod'
+        mock = PyPycLoaderMock({name: os.path.join(u'path', u'to', u'mod')})
         sys.dont_write_bytecode = dont_write_bytecode
         with util.uncache(name):
             mock.load_module(name)
@@ -424,18 +425,18 @@ class SkipWritingBytecodeTests(unittest.TestCase):
 
 class RegeneratedBytecodeTests(unittest.TestCase):
 
-    """Test that bytecode is regenerated as expected."""
+    u"""Test that bytecode is regenerated as expected."""
 
     @source_util.writes_bytecode_files
     def test_different_magic(self):
         # A different magic number should lead to new bytecode.
-        name = 'mod'
-        bad_magic = b'\x00\x00\x00\x00'
+        name = u'mod'
+        bad_magic = '\x00\x00\x00\x00'
         assert bad_magic != imp.get_magic()
-        mock = PyPycLoaderMock({name: os.path.join('path', 'to', 'mod')},
-                                {name: {'path': os.path.join('path', 'to',
-                                                    'mod.bytecode'),
-                                        'magic': bad_magic}})
+        mock = PyPycLoaderMock({name: os.path.join(u'path', u'to', u'mod')},
+                                {name: {u'path': os.path.join(u'path', u'to',
+                                                    u'mod.bytecode'),
+                                        u'magic': bad_magic}})
         with util.uncache(name):
             mock.load_module(name)
         self.assertTrue(name in mock.module_bytecode)
@@ -445,10 +446,10 @@ class RegeneratedBytecodeTests(unittest.TestCase):
     @source_util.writes_bytecode_files
     def test_old_mtime(self):
         # Bytecode with an older mtime should be regenerated.
-        name = 'mod'
+        name = u'mod'
         old_mtime = PyPycLoaderMock.default_mtime - 1
-        mock = PyPycLoaderMock({name: os.path.join('path', 'to', 'mod')},
-                {name: {'path': 'path/to/mod.bytecode', 'mtime': old_mtime}})
+        mock = PyPycLoaderMock({name: os.path.join(u'path', u'to', u'mod')},
+                {name: {u'path': u'path/to/mod.bytecode', u'mtime': old_mtime}})
         with util.uncache(name):
             mock.load_module(name)
         self.assertTrue(name in mock.module_bytecode)
@@ -458,32 +459,32 @@ class RegeneratedBytecodeTests(unittest.TestCase):
 
 class BadBytecodeFailureTests(unittest.TestCase):
 
-    """Test import failures when there is no source and parts of the bytecode
+    u"""Test import failures when there is no source and parts of the bytecode
     is bad."""
 
     def test_bad_magic(self):
         # A bad magic number should lead to an ImportError.
-        name = 'mod'
-        bad_magic = b'\x00\x00\x00\x00'
+        name = u'mod'
+        bad_magic = '\x00\x00\x00\x00'
         bc = {name:
-                {'path': os.path.join('path', 'to', 'mod'),
-                 'magic': bad_magic}}
+                {u'path': os.path.join(u'path', u'to', u'mod'),
+                 u'magic': bad_magic}}
         mock = PyPycLoaderMock({name: None}, bc)
         with util.uncache(name), self.assertRaises(ImportError):
             mock.load_module(name)
 
     def test_no_bytecode(self):
         # Missing code object bytecode should lead to an EOFError.
-        name = 'mod'
-        bc = {name: {'path': os.path.join('path', 'to', 'mod'), 'bc': b''}}
+        name = u'mod'
+        bc = {name: {u'path': os.path.join(u'path', u'to', u'mod'), u'bc': ''}}
         mock = PyPycLoaderMock({name: None}, bc)
         with util.uncache(name), self.assertRaises(EOFError):
             mock.load_module(name)
 
     def test_bad_bytecode(self):
         # Malformed code object bytecode should lead to a ValueError.
-        name = 'mod'
-        bc = {name: {'path': os.path.join('path', 'to', 'mod'), 'bc': b'1234'}}
+        name = u'mod'
+        bc = {name: {u'path': os.path.join(u'path', u'to', u'mod'), u'bc': '1234'}}
         mock = PyPycLoaderMock({name: None}, bc)
         with util.uncache(name), self.assertRaises(ValueError):
             mock.load_module(name)
@@ -494,15 +495,15 @@ def raise_ImportError(*args, **kwargs):
 
 class MissingPathsTests(unittest.TestCase):
 
-    """Test what happens when a source or bytecode path does not exist (either
+    u"""Test what happens when a source or bytecode path does not exist (either
     from *_path returning None or raising ImportError)."""
 
     def test_source_path_None(self):
         # Bytecode should be used when source_path returns None, along with
         # __file__ being set to the bytecode path.
-        name = 'mod'
-        bytecode_path = 'path/to/mod'
-        mock = PyPycLoaderMock({name: None}, {name: {'path': bytecode_path}})
+        name = u'mod'
+        bytecode_path = u'path/to/mod'
+        mock = PyPycLoaderMock({name: None}, {name: {u'path': bytecode_path}})
         with util.uncache(name):
             module = mock.load_module(name)
         self.assertEqual(module.__file__, bytecode_path)
@@ -512,23 +513,23 @@ class MissingPathsTests(unittest.TestCase):
 
     def test_all_paths_None(self):
         # If all *_path methods return None, raise ImportError.
-        name = 'mod'
+        name = u'mod'
         mock = PyPycLoaderMock({name: None})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.load_module(name)
 
     def test_source_path_ImportError(self):
         # An ImportError from source_path should trigger an ImportError.
-        name = 'mod'
-        mock = PyPycLoaderMock({}, {name: {'path': os.path.join('path', 'to',
-                                                                'mod')}})
+        name = u'mod'
+        mock = PyPycLoaderMock({}, {name: {u'path': os.path.join(u'path', u'to',
+                                                                u'mod')}})
         with util.uncache(name), self.assertRaises(ImportError):
             mock.load_module(name)
 
     def test_bytecode_path_ImportError(self):
         # An ImportError from bytecode_path should trigger an ImportError.
-        name = 'mod'
-        mock = PyPycLoaderMock({name: os.path.join('path', 'to', 'mod')})
+        name = u'mod'
+        mock = PyPycLoaderMock({name: os.path.join(u'path', u'to', u'mod')})
         bad_meth = types.MethodType(raise_ImportError, mock)
         mock.bytecode_path = bad_meth
         with util.uncache(name), self.assertRaises(ImportError):
@@ -537,15 +538,17 @@ class MissingPathsTests(unittest.TestCase):
 
 class SourceLoaderTestHarness(unittest.TestCase):
 
-    def setUp(self, *, is_package=True, **kwargs):
-        self.package = 'pkg'
+    def setUp(self, **kwargs):
+        if 'is_package' in kwargs: is_package = kwargs['is_package']; del kwargs['is_package']
+        else: is_package = True
+        self.package = u'pkg'
         if is_package:
-            self.path = os.path.join(self.package, '__init__.py')
+            self.path = os.path.join(self.package, u'__init__.py')
             self.name = self.package
         else:
-            module_name = 'mod'
-            self.path = os.path.join(self.package, '.'.join(['mod', 'py']))
-            self.name = '.'.join([self.package, module_name])
+            module_name = u'mod'
+            self.path = os.path.join(self.package, u'.'.join([u'mod', u'py']))
+            self.name = u'.'.join([self.package, module_name])
         self.cached = imp.cache_from_source(self.path)
         self.loader = self.loader_mock(self.path, **kwargs)
 
@@ -555,7 +558,7 @@ class SourceLoaderTestHarness(unittest.TestCase):
         self.assertEqual(module.__cached__, self.cached)
         self.assertEqual(module.__package__, self.package)
         self.assertEqual(module.__loader__, self.loader)
-        values = module._.split('::')
+        values = module._.split(u'::')
         self.assertEqual(values[0], self.name)
         self.assertEqual(values[1], self.path)
         self.assertEqual(values[2], self.cached)
@@ -575,7 +578,7 @@ class SourceLoaderTestHarness(unittest.TestCase):
 
 class SourceOnlyLoaderTests(SourceLoaderTestHarness):
 
-    """Test importlib_full.abc.SourceLoader for source-only loading.
+    u"""Test importlib_full.abc.SourceLoader for source-only loading.
 
     Reload testing is subsumed by the tests for
     importlib_full.util.module_for_loader.
@@ -587,7 +590,7 @@ class SourceOnlyLoaderTests(SourceLoaderTestHarness):
     def test_get_source(self):
         # Verify the source code is returned as a string.
         # If an IOError is raised by get_data then raise ImportError.
-        expected_source = self.loader.source.decode('utf-8')
+        expected_source = self.loader.source.decode(u'utf-8')
         self.assertEqual(self.loader.get_source(self.name), expected_source)
         def raise_IOError(path):
             raise IOError
@@ -625,25 +628,24 @@ class SourceOnlyLoaderTests(SourceLoaderTestHarness):
         with util.uncache(self.name):
             module = self.loader.load_module(self.name)
             self.verify_module(module)
-            self.assertTrue(not hasattr(module, '__path__'))
+            self.assertTrue(not hasattr(module, u'__path__'))
 
     def test_get_source_encoding(self):
         # Source is considered encoded in UTF-8 by default unless otherwise
         # specified by an encoding line.
-        source = "_ = 'ü'"
-        self.loader.source = source.encode('utf-8')
+        source = u"_ = 'ü'"
+        self.loader.source = source.encode(u'utf-8')
         returned_source = self.loader.get_source(self.name)
         self.assertEqual(returned_source, source)
-        source = "# coding: latin-1\n_ = ü"
-        self.loader.source = source.encode('latin-1')
+        source = u"# coding: latin-1\n_ = ü"
+        self.loader.source = source.encode(u'latin-1')
         returned_source = self.loader.get_source(self.name)
         self.assertEqual(returned_source, source)
 
 
-@unittest.skipIf(sys.dont_write_bytecode, "sys.dont_write_bytecode is true")
 class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
-    """Test importlib_full.abc.SourceLoader's use of bytecode.
+    u"""Test importlib_full.abc.SourceLoader's use of bytecode.
 
     Source-only testing handled by SourceOnlyLoaderTests.
 
@@ -651,14 +653,16 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
     loader_mock = SourceLoaderMock
 
-    def verify_code(self, code_object, *, bytecode_written=False):
-        super().verify_code(code_object)
+    def verify_code(self, code_object, **_3to2kwargs):
+        if 'bytecode_written' in _3to2kwargs: bytecode_written = _3to2kwargs['bytecode_written']; del _3to2kwargs['bytecode_written']
+        else: bytecode_written = False
+        super(self.__class__, self).verify_code(code_object)
         if bytecode_written:
             self.assertIn(self.cached, self.loader.written)
             data = bytearray(imp.get_magic())
             data.extend(marshal._w_long(self.loader.source_mtime))
             data.extend(marshal.dumps(code_object))
-            self.assertEqual(self.loader.written[self.cached], bytes(data))
+            self.assertEqual(self.loader.written[self.cached], str(data))
 
     def test_code_with_everything(self):
         # When everything should work.
@@ -667,7 +671,7 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
     def test_no_bytecode(self):
         # If no bytecode exists then move on to the source.
-        self.loader.bytecode_path = "<does not exist>"
+        self.loader.bytecode_path = u"<does not exist>"
         # Sanity check
         with self.assertRaises(IOError):
             bytecode_path = imp.cache_from_source(self.path)
@@ -689,7 +693,7 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
     def test_code_bad_magic(self):
         # Skip over bytecode with a bad magic number.
-        self.setUp(magic=b'0000')
+        self.setUp(magic='0000')
         # If bytecode is used then EOFError would be raised by marshal.
         self.loader.bytecode = self.loader.bytecode[8:]
         code_object = self.loader.get_code(self.name)
@@ -700,7 +704,7 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
         # Can assume it is false already thanks to the skipIf class decorator.
         try:
             sys.dont_write_bytecode = True
-            self.loader.bytecode_path = "<does not exist>"
+            self.loader.bytecode_path = u"<does not exist>"
             code_object = self.loader.get_code(self.name)
             self.assertNotIn(self.cached, self.loader.written)
         finally:
@@ -708,7 +712,7 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
     def test_no_set_data(self):
         # If set_data is not defined, one can still read bytecode.
-        self.setUp(magic=b'0000')
+        self.setUp(magic='0000')
         original_set_data = self.loader.__class__.set_data
         try:
             del self.loader.__class__.set_data
@@ -724,143 +728,144 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
                 raise exc
             return closure
 
-        self.setUp(magic=b'0000')
+        self.setUp(magic='0000')
         self.loader.set_data = raise_exception(NotImplementedError)
         code_object = self.loader.get_code(self.name)
         self.verify_code(code_object)
 
 
+SourceLoaderBytecodeTests = unittest.skipIf(sys.dont_write_bytecode, u"sys.dont_write_bytecode is true")(SourceLoaderBytecodeTests)
 class SourceLoaderGetSourceTests(unittest.TestCase):
 
-    """Tests for importlib_full.abc.SourceLoader.get_source()."""
+    u"""Tests for importlib_full.abc.SourceLoader.get_source()."""
 
     def test_default_encoding(self):
         # Should have no problems with UTF-8 text.
-        name = 'mod'
-        mock = SourceOnlyLoaderMock('mod.file')
-        source = 'x = "ü"'
-        mock.source = source.encode('utf-8')
+        name = u'mod'
+        mock = SourceOnlyLoaderMock(u'mod.file')
+        source = u'x = "ü"'
+        mock.source = source.encode(u'utf-8')
         returned_source = mock.get_source(name)
         self.assertEqual(returned_source, source)
 
     def test_decoded_source(self):
         # Decoding should work.
-        name = 'mod'
-        mock = SourceOnlyLoaderMock("mod.file")
-        source = "# coding: Latin-1\nx='ü'"
-        assert source.encode('latin-1') != source.encode('utf-8')
-        mock.source = source.encode('latin-1')
+        name = u'mod'
+        mock = SourceOnlyLoaderMock(u"mod.file")
+        source = u"# coding: Latin-1\nx='ü'"
+        assert source.encode(u'latin-1') != source.encode(u'utf-8')
+        mock.source = source.encode(u'latin-1')
         returned_source = mock.get_source(name)
         self.assertEqual(returned_source, source)
 
     def test_universal_newlines(self):
         # PEP 302 says universal newlines should be used.
-        name = 'mod'
-        mock = SourceOnlyLoaderMock('mod.file')
-        source = "x = 42\r\ny = -13\r\n"
-        mock.source = source.encode('utf-8')
+        name = u'mod'
+        mock = SourceOnlyLoaderMock(u'mod.file')
+        source = u"x = 42\r\ny = -13\r\n"
+        mock.source = source.encode(u'utf-8')
         expect = io.IncrementalNewlineDecoder(None, True).decode(source)
         self.assertEqual(mock.get_source(name), expect)
 
 class AbstractMethodImplTests(unittest.TestCase):
 
-    """Test the concrete abstractmethod implementations."""
+    u"""Test the concrete abstractmethod implementations."""
 
     class Loader(abc.Loader):
         def load_module(self, fullname):
-            super().load_module(fullname)
+            super(self.__class__, self).load_module(fullname)
 
     class Finder(abc.Finder):
         def find_module(self, _):
-            super().find_module(_)
+            super(self.__class__, self).find_module(_)
 
     class ResourceLoader(Loader, abc.ResourceLoader):
         def get_data(self, _):
-            super().get_data(_)
+            super(self.__class__, self).get_data(_)
 
     class InspectLoader(Loader, abc.InspectLoader):
         def is_package(self, _):
-            super().is_package(_)
+            super(self.__class__, self).is_package(_)
 
         def get_code(self, _):
-            super().get_code(_)
+            super(self.__class__, self).get_code(_)
 
         def get_source(self, _):
-            super().get_source(_)
+            super(self.__class__, self).get_source(_)
 
     class ExecutionLoader(InspectLoader, abc.ExecutionLoader):
         def get_filename(self, _):
-            super().get_filename(_)
+            super(self.__class__, self).get_filename(_)
 
     class SourceLoader(ResourceLoader, ExecutionLoader, abc.SourceLoader):
         pass
 
     class PyLoader(ResourceLoader, InspectLoader, abc.PyLoader):
         def source_path(self, _):
-            super().source_path(_)
+            super(self.__class__, self).source_path(_)
 
     class PyPycLoader(PyLoader, abc.PyPycLoader):
         def bytecode_path(self, _):
-            super().bytecode_path(_)
+            super(self.__class__, self).bytecode_path(_)
 
         def source_mtime(self, _):
-            super().source_mtime(_)
+            super(self.__class__, self).source_mtime(_)
 
         def write_bytecode(self, _, _2):
-            super().write_bytecode(_, _2)
+            super(self.__class__, self).write_bytecode(_, _2)
 
     def raises_NotImplementedError(self, ins, *args):
         for method_name in args:
             method = getattr(ins, method_name)
             arg_count = len(inspect.getargspec(method)[0]) - 1
-            args = [''] * arg_count
+            args = [u''] * arg_count
             try:
                 method(*args)
             except NotImplementedError:
                 pass
             else:
-                msg = "{}.{} did not raise NotImplementedError"
+                msg = u"{}.{} did not raise NotImplementedError"
                 self.fail(msg.format(ins.__class__.__name__, method_name))
 
     def test_Loader(self):
-        self.raises_NotImplementedError(self.Loader(), 'load_module')
+        self.raises_NotImplementedError(self.Loader(), u'load_module')
 
     # XXX misplaced; should be somewhere else
     def test_Finder(self):
-        self.raises_NotImplementedError(self.Finder(), 'find_module')
+        self.raises_NotImplementedError(self.Finder(), u'find_module')
 
     def test_ResourceLoader(self):
-        self.raises_NotImplementedError(self.ResourceLoader(), 'load_module',
-                                        'get_data')
+        self.raises_NotImplementedError(self.ResourceLoader(), u'load_module',
+                                        u'get_data')
 
     def test_InspectLoader(self):
-        self.raises_NotImplementedError(self.InspectLoader(), 'load_module',
-                                        'is_package', 'get_code', 'get_source')
+        self.raises_NotImplementedError(self.InspectLoader(), u'load_module',
+                                        u'is_package', u'get_code', u'get_source')
 
     def test_ExecutionLoader(self):
-        self.raises_NotImplementedError(self.ExecutionLoader(), 'load_module',
-                                        'is_package', 'get_code', 'get_source',
-                                        'get_filename')
+        self.raises_NotImplementedError(self.ExecutionLoader(), u'load_module',
+                                        u'is_package', u'get_code', u'get_source',
+                                        u'get_filename')
 
     def test_SourceLoader(self):
         ins = self.SourceLoader()
         # Required abstractmethods.
-        self.raises_NotImplementedError(ins, 'get_filename', 'get_data')
+        self.raises_NotImplementedError(ins, u'get_filename', u'get_data')
         # Optional abstractmethods.
-        self.raises_NotImplementedError(ins,'path_mtime', 'set_data')
+        self.raises_NotImplementedError(ins,u'path_mtime', u'set_data')
 
     def test_PyLoader(self):
-        self.raises_NotImplementedError(self.PyLoader(), 'source_path',
-                                        'get_data', 'is_package')
+        self.raises_NotImplementedError(self.PyLoader(), u'source_path',
+                                        u'get_data', u'is_package')
 
     def test_PyPycLoader(self):
-        self.raises_NotImplementedError(self.PyPycLoader(), 'source_path',
-                                        'source_mtime', 'bytecode_path',
-                                        'write_bytecode')
+        self.raises_NotImplementedError(self.PyPycLoader(), u'source_path',
+                                        u'source_mtime', u'bytecode_path',
+                                        u'write_bytecode')
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(PyLoaderTests, PyLoaderCompatTests,
                     PyLoaderInterfaceTests,
                     PyPycLoaderTests, PyPycLoaderInterfaceTests,
@@ -872,5 +877,5 @@ def test_main():
                     AbstractMethodImplTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

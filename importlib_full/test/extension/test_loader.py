@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from importlib_full import _bootstrap
 from . import util as ext_util
 from .. import abc
@@ -9,7 +10,7 @@ import unittest
 
 class LoaderTests(abc.LoaderTests):
 
-    """Test load_module() for extension modules."""
+    u"""Test load_module() for extension modules."""
 
     def load_module(self, fullname):
         loader = _bootstrap._ExtensionFileLoader(ext_util.NAME,
@@ -19,9 +20,9 @@ class LoaderTests(abc.LoaderTests):
     def test_module(self):
         with util.uncache(ext_util.NAME):
             module = self.load_module(ext_util.NAME)
-            for attr, value in [('__name__', ext_util.NAME),
-                                ('__file__', ext_util.FILEPATH),
-                                ('__package__', '')]:
+            for attr, value in [(u'__name__', ext_util.NAME),
+                                (u'__file__', ext_util.FILEPATH),
+                                (u'__package__', u'')]:
                 self.assertEqual(getattr(module, attr), value)
             self.assertTrue(ext_util.NAME in sys.modules)
             self.assertTrue(isinstance(module.__loader__,
@@ -47,13 +48,13 @@ class LoaderTests(abc.LoaderTests):
 
     def test_unloadable(self):
         with self.assertRaises(ImportError):
-            self.load_module('asdfjkl;')
+            self.load_module(u'asdfjkl;')
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(LoaderTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

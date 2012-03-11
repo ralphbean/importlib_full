@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from . import util
 import imp
 import importlib_full
@@ -7,20 +8,20 @@ import unittest
 
 class ImportModuleTests(unittest.TestCase):
 
-    """Test importlib_full.import_module."""
+    u"""Test importlib_full.import_module."""
 
     def test_module_import(self):
         # Test importing a top-level module.
-        with util.mock_modules('top_level') as mock:
+        with util.mock_modules(u'top_level') as mock:
             with util.import_state(meta_path=[mock]):
-                module = importlib_full.import_module('top_level')
-                self.assertEqual(module.__name__, 'top_level')
+                module = importlib_full.import_module(u'top_level')
+                self.assertEqual(module.__name__, u'top_level')
 
     def test_absolute_package_import(self):
         # Test importing a module from a package with an absolute name.
-        pkg_name = 'pkg'
-        pkg_long_name = '{0}.__init__'.format(pkg_name)
-        name = '{0}.mod'.format(pkg_name)
+        pkg_name = u'pkg'
+        pkg_long_name = u'{0}.__init__'.format(pkg_name)
+        name = u'{0}.mod'.format(pkg_name)
         with util.mock_modules(pkg_long_name, name) as mock:
             with util.import_state(meta_path=[mock]):
                 module = importlib_full.import_module(name)
@@ -28,11 +29,11 @@ class ImportModuleTests(unittest.TestCase):
 
     def test_shallow_relative_package_import(self):
         # Test importing a module from a package through a relative import.
-        pkg_name = 'pkg'
-        pkg_long_name = '{0}.__init__'.format(pkg_name)
-        module_name = 'mod'
-        absolute_name = '{0}.{1}'.format(pkg_name, module_name)
-        relative_name = '.{0}'.format(module_name)
+        pkg_name = u'pkg'
+        pkg_long_name = u'{0}.__init__'.format(pkg_name)
+        module_name = u'mod'
+        absolute_name = u'{0}.{1}'.format(pkg_name, module_name)
+        relative_name = u'.{0}'.format(module_name)
         with util.mock_modules(pkg_long_name, absolute_name) as mock:
             with util.import_state(meta_path=[mock]):
                 importlib_full.import_module(pkg_name)
@@ -40,20 +41,20 @@ class ImportModuleTests(unittest.TestCase):
                 self.assertEqual(module.__name__, absolute_name)
 
     def test_deep_relative_package_import(self):
-        modules = ['a.__init__', 'a.b.__init__', 'a.c']
+        modules = [u'a.__init__', u'a.b.__init__', u'a.c']
         with util.mock_modules(*modules) as mock:
             with util.import_state(meta_path=[mock]):
-                importlib_full.import_module('a')
-                importlib_full.import_module('a.b')
-                module = importlib_full.import_module('..c', 'a.b')
-                self.assertEqual(module.__name__, 'a.c')
+                importlib_full.import_module(u'a')
+                importlib_full.import_module(u'a.b')
+                module = importlib_full.import_module(u'..c', u'a.b')
+                self.assertEqual(module.__name__, u'a.c')
 
     def test_absolute_import_with_package(self):
         # Test importing a module from a package with an absolute name with
         # the 'package' argument given.
-        pkg_name = 'pkg'
-        pkg_long_name = '{0}.__init__'.format(pkg_name)
-        name = '{0}.mod'.format(pkg_name)
+        pkg_name = u'pkg'
+        pkg_long_name = u'{0}.__init__'.format(pkg_name)
+        name = u'{0}.mod'.format(pkg_name)
         with util.mock_modules(pkg_long_name, name) as mock:
             with util.import_state(meta_path=[mock]):
                 importlib_full.import_module(pkg_name)
@@ -64,13 +65,13 @@ class ImportModuleTests(unittest.TestCase):
         # Relative imports cannot happen without the 'package' argument being
         # set.
         with self.assertRaises(TypeError):
-            importlib_full.import_module('.support')
+            importlib_full.import_module(u'.support')
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(ImportModuleTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

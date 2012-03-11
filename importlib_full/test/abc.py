@@ -2,9 +2,10 @@ import abc
 import unittest
 
 
-class FinderTests(unittest.TestCase, metaclass=abc.ABCMeta):
+class FinderTests(unittest.TestCase):
 
-    """Basic tests for a finder to pass."""
+    __metaclass__ = abc.ABCMeta
+    u"""Basic tests for a finder to pass."""
 
     @abc.abstractmethod
     def test_module(self):
@@ -39,11 +40,12 @@ class FinderTests(unittest.TestCase, metaclass=abc.ABCMeta):
         pass
 
 
-class LoaderTests(unittest.TestCase, metaclass=abc.ABCMeta):
+class LoaderTests(unittest.TestCase):
 
+    __metaclass__ = abc.ABCMeta
     @abc.abstractmethod
     def test_module(self):
-        """A module should load without issue.
+        u"""A module should load without issue.
 
         After the loader returns the module should be in sys.modules.
 
@@ -59,7 +61,7 @@ class LoaderTests(unittest.TestCase, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def test_package(self):
-        """Loading a package should work.
+        u"""Loading a package should work.
 
         After the loader returns the module should be in sys.modules.
 
@@ -76,24 +78,24 @@ class LoaderTests(unittest.TestCase, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def test_lacking_parent(self):
-        """A loader should not be dependent on it's parent package being
+        u"""A loader should not be dependent on it's parent package being
         imported."""
         pass
 
     @abc.abstractmethod
     def test_module_reuse(self):
-        """If a module is already in sys.modules, it should be reused."""
+        u"""If a module is already in sys.modules, it should be reused."""
         pass
 
     @abc.abstractmethod
     def test_state_after_failure(self):
-        """If a module is already in sys.modules and a reload fails
+        u"""If a module is already in sys.modules and a reload fails
         (e.g. a SyntaxError), the module should be in the state it was before
         the reload began."""
         pass
 
     @abc.abstractmethod
     def test_unloadable(self):
-        """Test ImportError is raised when the loader is asked to load a module
+        u"""Test ImportError is raised when the loader is asked to load a module
         it can't."""
         pass

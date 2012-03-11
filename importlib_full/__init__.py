@@ -1,4 +1,4 @@
-"""A pure Python implementation of import.
+u"""A pure Python implementation of import.
 
 References on import:
 
@@ -18,7 +18,7 @@ References on import:
           http://www.python.org/dev/peps/pep-0328
 
 """
-__all__ = ['__import__', 'import_module']
+__all__ = [u'__import__', u'import_module']
 
 from . import _bootstrap
 
@@ -29,20 +29,20 @@ import tokenize
 # Bootstrap help #####################################################
 
 def _case_ok(directory, check):
-    """Check if the directory contains something matching 'check'.
+    u"""Check if the directory contains something matching 'check'.
 
     No check is done if the file/directory exists or not.
 
     """
-    if 'PYTHONCASEOK' in os.environ:
+    if u'PYTHONCASEOK' in os.environ:
         return True
-    elif check in os.listdir(directory if directory else os.getcwd()):
+    elif check in os.listdir(directory if directory else os.getcwdu()):
         return True
     return False
 
 
 def _w_long(x):
-    """Convert a 32-bit integer to little-endian.
+    u"""Convert a 32-bit integer to little-endian.
 
     XXX Temporary until marshal's long functions are exposed.
 
@@ -57,7 +57,7 @@ def _w_long(x):
 
 
 def _r_long(int_bytes):
-    """Convert 4 bytes in little-endian to an integer.
+    u"""Convert 4 bytes in little-endian to an integer.
 
     XXX Temporary until marshal's long function are exposed.
 
@@ -79,7 +79,7 @@ except ImportError:
         try:
             import os2 as _os
         except ImportError:
-            raise ImportError('posix, nt, or os2 module required for importlib_full')
+            raise ImportError(u'posix, nt, or os2 module required for importlib_full')
 _bootstrap._os = _os
 import imp, sys, marshal, errno, _io
 _bootstrap.imp = imp
@@ -106,7 +106,7 @@ from ._bootstrap import __import__
 
 
 def import_module(name, package=None):
-    """Import a module.
+    u"""Import a module.
 
     The 'package' argument is required when performing a relative import. It
     specifies the package to use as the anchor point from which to resolve the
@@ -114,11 +114,11 @@ def import_module(name, package=None):
 
     """
     level = 0
-    if name.startswith('.'):
+    if name.startswith(u'.'):
         if not package:
-            raise TypeError("relative imports require the 'package' argument")
+            raise TypeError(u"relative imports require the 'package' argument")
         for character in name:
-            if character != '.':
+            if character != u'.':
                 break
             level += 1
     return _bootstrap._gcd_import(name[level:], package, level)

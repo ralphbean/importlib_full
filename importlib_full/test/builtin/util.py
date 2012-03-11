@@ -1,7 +1,7 @@
 import sys
 
-assert 'errno' in sys.builtin_module_names
-NAME = 'errno'
+assert u'errno' in sys.builtin_module_names
+NAME = u'errno'
 
-assert 'importlib_full' not in sys.builtin_module_names
-BAD_NAME = 'importlib_full'
+assert u'importlib_full' not in sys.builtin_module_names
+BAD_NAME = u'importlib_full'

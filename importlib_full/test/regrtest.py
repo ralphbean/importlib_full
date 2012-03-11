@@ -1,4 +1,4 @@
-"""Run Python's standard test suite using importlib_full.__import__.
+u"""Run Python's standard test suite using importlib_full.__import__.
 
 Tests known to fail because of assumptions that importlib_full (properly)
 invalidates are automatically skipped if the entire test suite is run.
@@ -17,13 +17,13 @@ import importlib_full
 import sys
 from test import regrtest
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     __builtins__.__import__ = importlib_full.__import__
 
-    exclude = ['--exclude',
-                'test_frozen', # Does not expect __loader__ attribute
-                'test_pkg',  # Does not expect __loader__ attribute
-                'test_pydoc', # Does not expect __loader__ attribute
+    exclude = [u'--exclude',
+                u'test_frozen', # Does not expect __loader__ attribute
+                u'test_pkg',  # Does not expect __loader__ attribute
+                u'test_pydoc', # Does not expect __loader__ attribute
               ]
 
     # Switching on --exclude implies running all test but the ones listed, so

@@ -5,7 +5,7 @@ import sys
 PATH = None
 EXT = None
 FILENAME = None
-NAME = '_testcapi'
+NAME = u'_testcapi'
 _file_exts = [x[0] for x in imp.get_suffixes() if x[2] == imp.C_EXTENSION]
 try:
     for PATH in sys.path:

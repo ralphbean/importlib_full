@@ -4,16 +4,16 @@ import inspect
 import unittest
 
 
-class InheritanceTests:
+class InheritanceTests(object):
 
-    """Test that the specified class is a subclass/superclass of the expected
+    u"""Test that the specified class is a subclass/superclass of the expected
     classes."""
 
     subclasses = []
     superclasses = []
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(self.__class__, self).__init__(*args, **kwargs)
         assert self.subclasses or self.superclasses, self.__class__
         self.__test = getattr(abc, self.__class__.__name__)
 
@@ -21,13 +21,13 @@ class InheritanceTests:
         # Test that the expected subclasses inherit.
         for subclass in self.subclasses:
             self.assertTrue(issubclass(subclass, self.__test),
-                "{0} is not a subclass of {1}".format(subclass, self.__test))
+                u"{0} is not a subclass of {1}".format(subclass, self.__test))
 
     def test_superclasses(self):
         # Test that the class inherits from the expected superclasses.
         for superclass in self.superclasses:
             self.assertTrue(issubclass(self.__test, superclass),
-               "{0} is not a superclass of {1}".format(superclass, self.__test))
+               u"{0} is not a superclass of {1}".format(superclass, self.__test))
 
 
 class Finder(InheritanceTests, unittest.TestCase):
@@ -75,7 +75,7 @@ class PyPycLoader(InheritanceTests, unittest.TestCase):
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     classes = []
     for class_ in globals().values():
         if (inspect.isclass(class_) and
@@ -85,5 +85,5 @@ def test_main():
     run_unittest(*classes)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

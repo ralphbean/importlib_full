@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from importlib_full import machinery
 from .. import abc
 from .. import util
@@ -8,7 +9,7 @@ import unittest
 
 class FinderTests(abc.FinderTests):
 
-    """Test find_module() for built-in modules."""
+    u"""Test find_module() for built-in modules."""
 
     def test_module(self):
         # Common case.
@@ -33,23 +34,23 @@ class FinderTests(abc.FinderTests):
         pass
 
     def test_failure(self):
-        assert 'importlib_full' not in sys.builtin_module_names
-        loader = machinery.BuiltinImporter.find_module('importlib_full')
+        assert u'importlib_full' not in sys.builtin_module_names
+        loader = machinery.BuiltinImporter.find_module(u'importlib_full')
         self.assertTrue(loader is None)
 
     def test_ignore_path(self):
         # The value for 'path' should always trigger a failed import.
         with util.uncache(builtin_util.NAME):
             loader = machinery.BuiltinImporter.find_module(builtin_util.NAME,
-                                                            ['pkg'])
+                                                            [u'pkg'])
             self.assertTrue(loader is None)
 
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(FinderTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

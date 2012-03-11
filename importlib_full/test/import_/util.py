@@ -8,7 +8,7 @@ using___import__ = False
 
 
 def import_(*args, **kwargs):
-    """Delegate to allow for injecting different implementations of import."""
+    u"""Delegate to allow for injecting different implementations of import."""
     if using___import__:
         return __import__(*args, **kwargs)
     else:
@@ -16,12 +16,13 @@ def import_(*args, **kwargs):
 
 
 def importlib_full_only(fxn):
-    """Decorator to skip a test if using __builtins__.__import__."""
-    return unittest.skipIf(using___import__, "importlib_full-specific test")(fxn)
+    u"""Decorator to skip a test if using __builtins__.__import__."""
+    return unittest.skipIf(using___import__, u"importlib_full-specific test")(fxn)
 
 
-def mock_path_hook(*entries, importer):
-    """A mock sys.path_hooks entry."""
+def mock_path_hook(*entries, **_3to2kwargs):
+    importer = _3to2kwargs['importer']; del _3to2kwargs['importer']
+    u"""A mock sys.path_hooks entry."""
     def hook(entry):
         if entry not in entries:
             raise ImportError

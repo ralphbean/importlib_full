@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import importlib_full
 from importlib_full import machinery
 from .. import abc
@@ -11,13 +12,13 @@ import unittest
 
 class LoaderTests(abc.LoaderTests):
 
-    """Test load_module() for built-in modules."""
+    u"""Test load_module() for built-in modules."""
 
-    verification = {'__name__': 'errno', '__package__': '',
-                    '__loader__': machinery.BuiltinImporter}
+    verification = {u'__name__': u'errno', u'__package__': u'',
+                    u'__loader__': machinery.BuiltinImporter}
 
     def verify(self, module):
-        """Verify that the module matches against what it should have."""
+        u"""Verify that the module matches against what it should have."""
         self.assertTrue(isinstance(module, types.ModuleType))
         for attr, value in self.verification.items():
             self.assertEqual(getattr(module, attr), value)
@@ -52,7 +53,7 @@ class LoaderTests(abc.LoaderTests):
             self.assertTrue(module1 is module2)
 
     def test_unloadable(self):
-        name = 'dssdsdfff'
+        name = u'dssdsdfff'
         assert name not in sys.builtin_module_names
         with self.assertRaises(ImportError):
             self.load_module(name)
@@ -60,14 +61,14 @@ class LoaderTests(abc.LoaderTests):
     def test_already_imported(self):
         # Using the name of a module already imported but not a built-in should
         # still fail.
-        assert hasattr(importlib_full, '__file__')  # Not a built-in.
+        assert hasattr(importlib_full, u'__file__')  # Not a built-in.
         with self.assertRaises(ImportError):
-            self.load_module('importlib_full')
+            self.load_module(u'importlib_full')
 
 
 class InspectLoaderTests(unittest.TestCase):
 
-    """Tests for InspectLoader methods for BuiltinImporter."""
+    u"""Tests for InspectLoader methods for BuiltinImporter."""
 
     def test_get_code(self):
         # There is no code object.
@@ -86,7 +87,7 @@ class InspectLoaderTests(unittest.TestCase):
 
     def test_not_builtin(self):
         # Modules not built-in should raise ImportError.
-        for meth_name in ('get_code', 'get_source', 'is_package'):
+        for meth_name in (u'get_code', u'get_source', u'is_package'):
             method = getattr(machinery.BuiltinImporter, meth_name)
         with self.assertRaises(ImportError):
             method(builtin_util.BAD_NAME)
@@ -94,9 +95,9 @@ class InspectLoaderTests(unittest.TestCase):
 
 
 def test_main():
-    from test.support import run_unittest
+    from test.test_support import run_unittest
     run_unittest(LoaderTests, InspectLoaderTests)
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     test_main()

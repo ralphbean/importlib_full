@@ -1,9 +1,10 @@
-"""Benchmark some basic import use-cases.
+u"""Benchmark some basic import use-cases.
 
 The assumption is made that this benchmark is run in a fresh interpreter and
 thus has no external changes made to import-related attributes in sys.
 
 """
+from __future__ import with_statement
 from . import util
 from .source import util as source_util
 import decimal
@@ -15,12 +16,16 @@ import sys
 import timeit
 
 
-def bench(name, cleanup=lambda: None, *, seconds=1, repeat=3):
-    """Bench the given statement as many times as necessary until total
+def bench(name, cleanup=lambda: None, **_3to2kwargs):
+    if 'repeat' in _3to2kwargs: repeat = _3to2kwargs['repeat']; del _3to2kwargs['repeat']
+    else: repeat = 3
+    if 'seconds' in _3to2kwargs: seconds = _3to2kwargs['seconds']; del _3to2kwargs['seconds']
+    else: seconds = 1
+    u"""Bench the given statement as many times as necessary until total
     executions take one second."""
-    stmt = "__import__({!r})".format(name)
+    stmt = u"__import__({!r})".format(name)
     timer = timeit.Timer(stmt)
-    for x in range(repeat):
+    for x in xrange(repeat):
         total_time = 0
         count = 0
         while total_time < seconds:
@@ -36,11 +41,11 @@ def bench(name, cleanup=lambda: None, *, seconds=1, repeat=3):
         yield count // seconds
 
 def from_cache(seconds, repeat):
-    """sys.modules"""
-    name = '<benchmark import>'
+    u"""sys.modules"""
+    name = u'<benchmark import>'
     module = imp.new_module(name)
-    module.__file__ = '<test>'
-    module.__package__ = ''
+    module.__file__ = u'<test>'
+    module.__package__ = u''
     with util.uncache(name):
         sys.modules[name] = module
         for result in bench(name, repeat=repeat, seconds=seconds):
@@ -48,8 +53,8 @@ def from_cache(seconds, repeat):
 
 
 def builtin_mod(seconds, repeat):
-    """Built-in module"""
-    name = 'errno'
+    u"""Built-in module"""
+    name = u'errno'
     if name in sys.modules:
         del sys.modules[name]
     # Relying on built-in importer being implicit.
@@ -59,10 +64,10 @@ def builtin_mod(seconds, repeat):
 
 
 def source_wo_bytecode(seconds, repeat):
-    """Source w/o bytecode: simple"""
+    u"""Source w/o bytecode: simple"""
     sys.dont_write_bytecode = True
     try:
-        name = '__importlib_full_test_benchmark__'
+        name = u'__importlib_full_test_benchmark__'
         # Clears out sys.modules and puts an entry at the front of sys.path.
         with source_util.create_modules(name) as mapping:
             assert not os.path.exists(imp.cache_from_source(mapping[name]))
@@ -74,8 +79,8 @@ def source_wo_bytecode(seconds, repeat):
 
 
 def decimal_wo_bytecode(seconds, repeat):
-    """Source w/o bytecode: decimal"""
-    name = 'decimal'
+    u"""Source w/o bytecode: decimal"""
+    name = u'decimal'
     decimal_bytecode = imp.cache_from_source(decimal.__file__)
     if os.path.exists(decimal_bytecode):
         os.unlink(decimal_bytecode)
@@ -89,9 +94,9 @@ def decimal_wo_bytecode(seconds, repeat):
 
 
 def source_writing_bytecode(seconds, repeat):
-    """Source writing bytecode: simple"""
+    u"""Source writing bytecode: simple"""
     assert not sys.dont_write_bytecode
-    name = '__importlib_full_test_benchmark__'
+    name = u'__importlib_full_test_benchmark__'
     with source_util.create_modules(name) as mapping:
         def cleanup():
             sys.modules.pop(name)
@@ -102,9 +107,9 @@ def source_writing_bytecode(seconds, repeat):
 
 
 def decimal_writing_bytecode(seconds, repeat):
-    """Source writing bytecode: decimal"""
+    u"""Source writing bytecode: decimal"""
     assert not sys.dont_write_bytecode
-    name = 'decimal'
+    name = u'decimal'
     def cleanup():
         sys.modules.pop(name)
         os.unlink(imp.cache_from_source(decimal.__file__))
@@ -113,8 +118,8 @@ def decimal_writing_bytecode(seconds, repeat):
 
 
 def source_using_bytecode(seconds, repeat):
-    """Bytecode w/ source: simple"""
-    name = '__importlib_full_test_benchmark__'
+    u"""Bytecode w/ source: simple"""
+    name = u'__importlib_full_test_benchmark__'
     with source_util.create_modules(name) as mapping:
         py_compile.compile(mapping[name])
         assert os.path.exists(imp.cache_from_source(mapping[name]))
@@ -124,8 +129,8 @@ def source_using_bytecode(seconds, repeat):
 
 
 def decimal_using_bytecode(seconds, repeat):
-    """Bytecode w/ source: decimal"""
-    name = 'decimal'
+    u"""Bytecode w/ source: decimal"""
+    name = u'decimal'
     py_compile.compile(decimal.__file__)
     for result in bench(name, lambda: sys.modules.pop(name), repeat=repeat,
                         seconds=seconds):
@@ -140,31 +145,31 @@ def main(import_):
                   decimal_using_bytecode, decimal_writing_bytecode,
                   decimal_wo_bytecode,)
     seconds = 1
-    seconds_plural = 's' if seconds > 1 else ''
+    seconds_plural = u's' if seconds > 1 else u''
     repeat = 3
-    header = "Measuring imports/second over {} second{}, best out of {}\n"
-    print(header.format(seconds, seconds_plural, repeat))
+    header = u"Measuring imports/second over {} second{}, best out of {}\n"
+    print header.format(seconds, seconds_plural, repeat)
     for benchmark in benchmarks:
-        print(benchmark.__doc__, "[", end=' ')
+        print benchmark.__doc__, u"[",
         sys.stdout.flush()
         results = []
         for result in benchmark(seconds=seconds, repeat=repeat):
             results.append(result)
-            print(result, end=' ')
+            print result,
             sys.stdout.flush()
         assert not sys.dont_write_bytecode
-        print("]", "best is", format(max(results), ',d'))
+        print u"]", u"best is", format(max(results), u',d')
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     import optparse
 
     parser = optparse.OptionParser()
-    parser.add_option('-b', '--builtin', dest='builtin', action='store_true',
-                        default=False, help="use the built-in __import__")
+    parser.add_option(u'-b', u'--builtin', dest=u'builtin', action=u'store_true',
+                        default=False, help=u"use the built-in __import__")
     options, args = parser.parse_args()
     if args:
-        raise RuntimeError("unrecognized args: {}".format(args))
+        raise RuntimeError(u"unrecognized args: {}".format(args))
     import_ = __import__
     if not options.builtin:
         import_ = importlib_full.__import__

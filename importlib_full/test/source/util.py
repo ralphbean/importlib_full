@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from .. import util
 import contextlib
 import errno
@@ -7,11 +8,12 @@ import os
 import os.path
 import sys
 import tempfile
-from test import support
+from test import test_support as support
+from io import open
 
 
 def writes_bytecode_files(fxn):
-    """Decorator to protect sys.dont_write_bytecode from mutation and to skip
+    u"""Decorator to protect sys.dont_write_bytecode from mutation and to skip
     tests that require it to be set to False."""
     if sys.dont_write_bytecode:
         return lambda *args, **kwargs: None
@@ -28,20 +30,20 @@ def writes_bytecode_files(fxn):
 
 
 def ensure_bytecode_path(bytecode_path):
-    """Ensure that the __pycache__ directory for PEP 3147 pyc file exists.
+    u"""Ensure that the __pycache__ directory for PEP 3147 pyc file exists.
 
     :param bytecode_path: File system path to PEP 3147 pyc file.
     """
     try:
         os.mkdir(os.path.dirname(bytecode_path))
-    except OSError as error:
+    except OSError, error:
         if error.errno != errno.EEXIST:
             raise
 
 
 @contextlib.contextmanager
 def create_modules(*names):
-    """Temporarily create each named module with an attribute (named 'attr')
+    u"""Temporarily create each named module with an attribute (named 'attr')
     that contains the name passed into the context manager that caused the
     creation of the module.
 
@@ -55,32 +57,32 @@ def create_modules(*names):
     well.
 
     """
-    source = 'attr = {0!r}'
+    source = u'attr = {0!r}'
     created_paths = []
     mapping = {}
     state_manager = None
     uncache_manager = None
     try:
         temp_dir = tempfile.mkdtemp()
-        mapping['.root'] = temp_dir
+        mapping[u'.root'] = temp_dir
         import_names = set()
         for name in names:
-            if not name.endswith('__init__'):
+            if not name.endswith(u'__init__'):
                 import_name = name
             else:
-                import_name = name[:-len('.__init__')]
+                import_name = name[:-len(u'.__init__')]
             import_names.add(import_name)
             if import_name in sys.modules:
                 del sys.modules[import_name]
-            name_parts = name.split('.')
+            name_parts = name.split(u'.')
             file_path = temp_dir
             for directory in name_parts[:-1]:
                 file_path = os.path.join(file_path, directory)
                 if not os.path.exists(file_path):
                     os.mkdir(file_path)
                     created_paths.append(file_path)
-            file_path = os.path.join(file_path, name_parts[-1] + '.py')
-            with open(file_path, 'w') as file:
+            file_path = os.path.join(file_path, name_parts[-1] + u'.py')
+            with open(file_path, u'w') as file:
                 file.write(source.format(name))
             created_paths.append(file_path)
             mapping[name] = file_path
