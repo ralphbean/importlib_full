@@ -1,4 +1,5 @@
 u"""Abstract base classes related to import."""
+from __future__ import absolute_import
 from . import _bootstrap
 from . import machinery
 from . import util
