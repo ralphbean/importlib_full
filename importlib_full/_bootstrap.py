@@ -167,7 +167,7 @@ def _requires_builtin(fxn):
     """Decorator to verify the named module is built-in."""
     def wrapper(self, fullname):
         if fullname not in sys.builtin_module_names:
-            raise ImportError("{0} is not a built-in module".format(fullname))
+            raise ImportError("%s is not a built-in module" % fullname)
         return fxn(self, fullname)
     _wrap(wrapper, fxn)
     return wrapper
@@ -177,7 +177,7 @@ def _requires_frozen(fxn):
     """Decorator to verify the named module is frozen."""
     def wrapper(self, fullname):
         if not imp.is_frozen(fullname):
-            raise ImportError("{0} is not a frozen module".format(fullname))
+            raise ImportError("%s is not a frozen module" % fullname)
         return fxn(self, fullname)
     _wrap(wrapper, fxn)
     return wrapper
@@ -312,12 +312,12 @@ class _LoaderBasics:
         magic = data[:4]
         raw_timestamp = data[4:8]
         if len(magic) != 4 or magic != imp.get_magic():
-            raise ImportError("bad magic number in {}".format(fullname))
+            raise ImportError("bad magic number in %s" % fullname)
         elif len(raw_timestamp) != 4:
-            raise EOFError("bad timestamp in {}".format(fullname))
+            raise EOFError("bad timestamp in %s" % fullname)
         elif source_mtime is not None:
             if marshal._r_long(raw_timestamp) != source_mtime:
-                raise ImportError("bytecode is stale for {}".format(fullname))
+                raise ImportError("bytecode is stale for %s" % fullname)
         # Can't return the code object as errors from marshal loading need to
         # propagate even when source is available.
         return data[8:]
@@ -406,8 +406,8 @@ class SourceLoader(_LoaderBasics):
                         if isinstance(found, code_type):
                             return found
                         else:
-                            msg = "Non-code object in {}"
-                            raise ImportError(msg.format(bytecode_path))
+                            msg = "Non-code object in %s"
+                            raise ImportError(msg % bytecode_path)
         source_bytes = self.get_data(source_path)
         code_object = compile(source_bytes, source_path, 'exec',
                                 dont_inherit=True)
@@ -518,7 +518,7 @@ class _SourcelessFileLoader(_FileLoader, _LoaderBasics):
         if isinstance(found, code_type):
             return found
         else:
-            raise ImportError("Non-code object in {}".format(path))
+            raise ImportError("Non-code object in %s" % path)
 
     def get_source(self, fullname):
         """Return None as there is no source code."""
@@ -593,7 +593,7 @@ class PathFinder:
             except ImportError:
                 continue
         else:
-            raise ImportError("no path hook found for {0}".format(path))
+            raise ImportError("no path hook found for %s" % path)
 
     @classmethod
     def _path_importer_cache(cls, path, default=None):
@@ -673,8 +673,8 @@ class _FileFinder:
                         _case_ok(base_path, init_filename)):
                     return loader(fullname, full_path)
             else:
-                msg = "Not importing directory {}: missing __init__"
-                _warnings.warn(msg.format(base_path), ImportWarning)
+                msg = "Not importing directory %s: missing __init__"
+                _warnings.warn(msg % base_path, ImportWarning)
         for suffix, loader in self.modules:
             mod_filename = tail_module + suffix
             full_path = _path_join(self.path, mod_filename)
@@ -758,7 +758,7 @@ class _ImportLockContext:
 
 _IMPLICIT_META_PATH = [BuiltinImporter, FrozenImporter, _DefaultPathFinder]
 
-_ERR_MSG = 'No module named {}'
+_ERR_MSG = 'No module named %s'
 
 def _gcd_import(name, package=None, level=0):
     """Import and return the module based on its name, the package the call is
@@ -773,9 +773,9 @@ def _gcd_import(name, package=None, level=0):
         if not hasattr(package, 'rindex'):
             raise ValueError("__package__ not set to a string")
         elif package not in sys.modules:
-            msg = ("Parent module {0!r} not loaded, cannot perform relative "
+            msg = ("Parent module %r not loaded, cannot perform relative "
                    "import")
-            raise SystemError(msg.format(package))
+            raise SystemError(msg % package)
     if not name and level == 0:
         raise ValueError("Empty module name")
     if level > 0:
@@ -787,15 +787,14 @@ def _gcd_import(name, package=None, level=0):
                 raise ValueError("attempted relative import beyond "
                                  "top-level package")
         if name:
-            name = "{0}.{1}".format(package[:dot], name)
+            name = "%s.%s" % (package[:dot], name)
         else:
             name = package[:dot]
     with _ImportLockContext():
         try:
             module = sys.modules[name]
             if module is None:
-                message = ("import of {} halted; "
-                            "None in sys.modules".format(name))
+                message = "import of %s halted; None in sys.modules" % name
                 raise ImportError(message)
             return module
         except KeyError:
@@ -810,7 +809,7 @@ def _gcd_import(name, package=None, level=0):
             try:
                 path = parent_module.__path__
             except AttributeError:
-                msg = (_ERR_MSG + '; {} is not a package').format(name, parent)
+                msg = (_ERR_MSG + '; %s is not a package') % (name, parent)
                 raise ImportError(msg)
         meta_path = sys.meta_path + _IMPLICIT_META_PATH
         for finder in meta_path:
@@ -819,7 +818,7 @@ def _gcd_import(name, package=None, level=0):
                 loader.load_module(name)
                 break
         else:
-            raise ImportError(_ERR_MSG.format(name))
+            raise ImportError(_ERR_MSG % name)
         # Backwards-compatibility; be nicer to skip the dict lookup.
         module = sys.modules[name]
         if parent:
@@ -850,7 +849,7 @@ def __import__(name, globals={}, locals={}, fromlist=[], level=0):
 
     """
     if not hasattr(name, 'rpartition'):
-        raise TypeError("module name must be str, not {}".format(type(name)))
+        raise TypeError("module name must be str, not %r" % type(name))
     if level == 0:
         module = _gcd_import(name)
     else:
@@ -882,7 +881,7 @@ def __import__(name, globals={}, locals={}, fromlist=[], level=0):
                 fromlist.extend(module.__all__)
             for x in (y for y in fromlist if not hasattr(module,y)):
                 try:
-                    _gcd_import('{0}.{1}'.format(module.__name__, x))
+                    _gcd_import('%s.%s' % (module.__name__, x))
                 except ImportError:
                     pass
         return module
