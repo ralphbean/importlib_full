@@ -1,5 +1,5 @@
 """Test case-sensitivity (PEP 235)."""
-from importlib import _bootstrap
+from importlib_full import _bootstrap
 from .. import util
 from . import util as source_util
 import os

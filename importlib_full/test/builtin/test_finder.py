@@ -1,4 +1,4 @@
-from importlib import machinery
+from importlib_full import machinery
 from .. import abc
 from .. import util
 from . import util as builtin_util
@@ -33,8 +33,8 @@ class FinderTests(abc.FinderTests):
         pass
 
     def test_failure(self):
-        assert 'importlib' not in sys.builtin_module_names
-        loader = machinery.BuiltinImporter.find_module('importlib')
+        assert 'importlib_full' not in sys.builtin_module_names
+        loader = machinery.BuiltinImporter.find_module('importlib_full')
         self.assertTrue(loader is None)
 
     def test_ignore_path(self):

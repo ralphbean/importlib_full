@@ -2,7 +2,7 @@ from .. import util
 from . import util as import_util
 import sys
 import unittest
-import importlib
+import importlib_full
 
 
 class ParentModuleTests(unittest.TestCase):

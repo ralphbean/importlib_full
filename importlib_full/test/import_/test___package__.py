@@ -71,7 +71,7 @@ class Using__package__(unittest.TestCase):
             import_util.import_('', globals, {}, ['relimport'], 1)
 
 
-@import_util.importlib_only
+@import_util.importlib_full_only
 class Setting__package__(unittest.TestCase):
 
     """Because __package__ is a new feature, it is not always set by a loader.

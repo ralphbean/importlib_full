@@ -1,5 +1,5 @@
-import importlib
-from importlib import _bootstrap
+import importlib_full
+from importlib_full import _bootstrap
 from .. import abc
 from .. import util
 from . import util as source_util
@@ -115,7 +115,7 @@ class SimpleTest(unittest.TestCase):
         # not only work, but keep all attributes relative.
         file_path = '_temp.py'
         with open(file_path, 'w') as file:
-            file.write("# test file for importlib")
+            file.write("# test file for importlib_full")
         try:
             with util.uncache('_temp'):
                 loader = _bootstrap._SourceFileLoader('_temp', file_path)
@@ -306,7 +306,7 @@ class SourceLoaderBadBytecodeTest(BadBytecodeTest):
                 bytecode_file.write(zeros)
             self.import_(mapping['_temp'], '_temp')
             source_mtime = os.path.getmtime(mapping['_temp'])
-            source_timestamp = importlib._w_long(source_mtime)
+            source_timestamp = importlib_full._w_long(source_mtime)
             with open(bytecode_path, 'rb') as bytecode_file:
                 bytecode_file.seek(4)
                 self.assertEqual(bytecode_file.read(4), source_timestamp)

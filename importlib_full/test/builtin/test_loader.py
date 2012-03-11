@@ -1,5 +1,5 @@
-import importlib
-from importlib import machinery
+import importlib_full
+from importlib_full import machinery
 from .. import abc
 from .. import util
 from . import util as builtin_util
@@ -60,9 +60,9 @@ class LoaderTests(abc.LoaderTests):
     def test_already_imported(self):
         # Using the name of a module already imported but not a built-in should
         # still fail.
-        assert hasattr(importlib, '__file__')  # Not a built-in.
+        assert hasattr(importlib_full, '__file__')  # Not a built-in.
         with self.assertRaises(ImportError):
-            self.load_module('importlib')
+            self.load_module('importlib_full')
 
 
 class InspectLoaderTests(unittest.TestCase):

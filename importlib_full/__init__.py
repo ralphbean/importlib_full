@@ -79,7 +79,7 @@ except ImportError:
         try:
             import os2 as _os
         except ImportError:
-            raise ImportError('posix, nt, or os2 module required for importlib')
+            raise ImportError('posix, nt, or os2 module required for importlib_full')
 _bootstrap._os = _os
 import imp, sys, marshal, errno, _io
 _bootstrap.imp = imp

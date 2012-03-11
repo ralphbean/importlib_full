@@ -1,4 +1,4 @@
-from importlib import _bootstrap
+from importlib_full import _bootstrap
 from .. import abc
 from . import util as source_util
 from test.support import make_legacy_pyc
@@ -136,7 +136,7 @@ class FinderTests(abc.FinderTests):
         # The empty string from sys.path means to search in the cwd.
         finder = _bootstrap._FileFinder('', _bootstrap._SourceFinderDetails())
         with open('mod.py', 'w') as file:
-            file.write("# test file for importlib")
+            file.write("# test file for importlib_full")
         try:
             loader = finder.find_module('mod')
             self.assertTrue(hasattr(loader, 'load_module'))

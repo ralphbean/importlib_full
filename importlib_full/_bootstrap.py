@@ -3,7 +3,7 @@
 This module is NOT meant to be directly imported! It has been designed such
 that it can be bootstrapped into Python as the implementation of import. As
 such it requires the injection of specific modules and attributes in order to
-work. One should use importlib as the public-facing version of this module.
+work. One should use importlib_full as the public-facing version of this module.
 
 """
 

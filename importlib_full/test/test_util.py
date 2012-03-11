@@ -1,4 +1,4 @@
-from importlib import util
+from importlib_full import util
 from . import util as test_util
 import imp
 import sys
@@ -8,7 +8,7 @@ import unittest
 
 class ModuleForLoaderTests(unittest.TestCase):
 
-    """Tests for importlib.util.module_for_loader."""
+    """Tests for importlib_full.util.module_for_loader."""
 
     def return_module(self, name):
         fxn = util.module_for_loader(lambda self, module: module)
@@ -63,7 +63,7 @@ class ModuleForLoaderTests(unittest.TestCase):
 class SetPackageTests(unittest.TestCase):
 
 
-    """Tests for importlib.util.set_package."""
+    """Tests for importlib_full.util.set_package."""
 
     def verify(self, module, expect):
         """Verify the module has the expected value for __package__ after

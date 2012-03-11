@@ -8,7 +8,7 @@ from . import util
 from .source import util as source_util
 import decimal
 import imp
-import importlib
+import importlib_full
 import os
 import py_compile
 import sys
@@ -62,7 +62,7 @@ def source_wo_bytecode(seconds, repeat):
     """Source w/o bytecode: simple"""
     sys.dont_write_bytecode = True
     try:
-        name = '__importlib_test_benchmark__'
+        name = '__importlib_full_test_benchmark__'
         # Clears out sys.modules and puts an entry at the front of sys.path.
         with source_util.create_modules(name) as mapping:
             assert not os.path.exists(imp.cache_from_source(mapping[name]))
@@ -91,7 +91,7 @@ def decimal_wo_bytecode(seconds, repeat):
 def source_writing_bytecode(seconds, repeat):
     """Source writing bytecode: simple"""
     assert not sys.dont_write_bytecode
-    name = '__importlib_test_benchmark__'
+    name = '__importlib_full_test_benchmark__'
     with source_util.create_modules(name) as mapping:
         def cleanup():
             sys.modules.pop(name)
@@ -114,7 +114,7 @@ def decimal_writing_bytecode(seconds, repeat):
 
 def source_using_bytecode(seconds, repeat):
     """Bytecode w/ source: simple"""
-    name = '__importlib_test_benchmark__'
+    name = '__importlib_full_test_benchmark__'
     with source_util.create_modules(name) as mapping:
         py_compile.compile(mapping[name])
         assert os.path.exists(imp.cache_from_source(mapping[name]))
@@ -167,6 +167,6 @@ if __name__ == '__main__':
         raise RuntimeError("unrecognized args: {}".format(args))
     import_ = __import__
     if not options.builtin:
-        import_ = importlib.__import__
+        import_ = importlib_full.__import__
 
     main(import_)

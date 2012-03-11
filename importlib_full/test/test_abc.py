@@ -1,5 +1,5 @@
-from importlib import abc
-from importlib import machinery
+from importlib_full import abc
+from importlib_full import machinery
 import inspect
 import unittest
 

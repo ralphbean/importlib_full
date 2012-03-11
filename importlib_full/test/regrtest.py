@@ -1,6 +1,6 @@
-"""Run Python's standard test suite using importlib.__import__.
+"""Run Python's standard test suite using importlib_full.__import__.
 
-Tests known to fail because of assumptions that importlib (properly)
+Tests known to fail because of assumptions that importlib_full (properly)
 invalidates are automatically skipped if the entire test suite is run.
 Otherwise all command-line options valid for test.regrtest are also valid for
 this script.
@@ -13,12 +13,12 @@ XXX FAILING
         exception for trying to import by file name does not match
 
 """
-import importlib
+import importlib_full
 import sys
 from test import regrtest
 
 if __name__ == '__main__':
-    __builtins__.__import__ = importlib.__import__
+    __builtins__.__import__ = importlib_full.__import__
 
     exclude = ['--exclude',
                 'test_frozen', # Does not expect __loader__ attribute

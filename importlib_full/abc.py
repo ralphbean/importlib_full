@@ -149,9 +149,9 @@ class PyLoader(SourceLoader):
     compatible with Python 3.1 onwards::
 
         try:
-            from importlib.abc import SourceLoader
+            from importlib_full.abc import SourceLoader
         except ImportError:
-            from importlib.abc import PyLoader as SourceLoader
+            from importlib_full.abc import PyLoader as SourceLoader
 
 
         class CustomLoader(SourceLoader):
@@ -190,10 +190,10 @@ class PyLoader(SourceLoader):
         None.
 
         """
-        warnings.warn("importlib.abc.PyLoader is deprecated and is "
+        warnings.warn("importlib_full.abc.PyLoader is deprecated and is "
                             "slated for removal in Python 3.4; "
                             "use SourceLoader instead. "
-                            "See the importlib documentation on how to be "
+                            "See the importlib_full documentation on how to be "
                             "compatible with Python 3.1 onwards.",
                         PendingDeprecationWarning)
         path = self.source_path(fullname)
@@ -230,7 +230,7 @@ class PyPycLoader(PyLoader):
 
     def get_code(self, fullname):
         """Get a code object from source or bytecode."""
-        warnings.warn("importlib.abc.PyPycLoader is deprecated and slated for "
+        warnings.warn("importlib_full.abc.PyPycLoader is deprecated and slated for "
                             "removal in Python 3.4; use SourceLoader instead. "
                             "If Python 3.1 compatibility is required, see the "
                             "latest documentation for PyLoader.",

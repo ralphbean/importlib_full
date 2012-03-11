@@ -1,5 +1,5 @@
-from importlib import _bootstrap
-from importlib import machinery
+from importlib_full import _bootstrap
+from importlib_full import machinery
 from .. import util
 from . import util as import_util
 import imp
@@ -77,7 +77,7 @@ class FinderTests(unittest.TestCase):
 
 class DefaultPathFinderTests(unittest.TestCase):
 
-    """Test importlib._bootstrap._DefaultPathFinder."""
+    """Test importlib_full._bootstrap._DefaultPathFinder."""
 
     def test_implicit_hooks(self):
         # Test that the implicit path hooks are used.

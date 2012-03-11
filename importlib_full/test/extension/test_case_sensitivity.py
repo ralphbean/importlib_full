@@ -1,7 +1,7 @@
 import sys
 from test import support
 import unittest
-from importlib import _bootstrap
+from importlib_full import _bootstrap
 from .. import util
 from . import util as ext_util
 

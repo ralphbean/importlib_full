@@ -1,5 +1,5 @@
-import importlib
-from importlib import abc
+import importlib_full
+from importlib_full import abc
 
 from .. import abc as testing_abc
 from .. import util
@@ -145,7 +145,7 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
             self.path_to_bytecode[data['path']] = name
             self.bytecode_to_path[name] = data['path']
             magic = data.get('magic', imp.get_magic())
-            mtime = importlib._w_long(data.get('mtime', self.default_mtime))
+            mtime = importlib_full._w_long(data.get('mtime', self.default_mtime))
             if 'bc' in data:
                 bc = data['bc']
             else:
@@ -203,7 +203,7 @@ class PyPycLoaderMock(abc.PyPycLoader, PyLoaderMock):
 
 class PyLoaderTests(testing_abc.LoaderTests):
 
-    """Tests for importlib.abc.PyLoader."""
+    """Tests for importlib_full.abc.PyLoader."""
 
     mocker = PyLoaderMock
 
@@ -296,7 +296,7 @@ class PyLoaderCompatTests(PyLoaderTests):
 
 class PyLoaderInterfaceTests(unittest.TestCase):
 
-    """Tests for importlib.abc.PyLoader to make sure that when source_path()
+    """Tests for importlib_full.abc.PyLoader to make sure that when source_path()
     doesn't return a path everything works as expected."""
 
     def test_no_source_path(self):
@@ -330,7 +330,7 @@ class PyLoaderInterfaceTests(unittest.TestCase):
 
 class PyPycLoaderTests(PyLoaderTests):
 
-    """Tests for importlib.abc.PyPycLoader."""
+    """Tests for importlib_full.abc.PyPycLoader."""
 
     mocker = PyPycLoaderMock
 
@@ -340,7 +340,7 @@ class PyPycLoaderTests(PyLoaderTests):
         self.assertIn(name, mock.module_bytecode)
         magic = mock.module_bytecode[name][:4]
         self.assertEqual(magic, imp.get_magic())
-        mtime = importlib._r_long(mock.module_bytecode[name][4:8])
+        mtime = importlib_full._r_long(mock.module_bytecode[name][4:8])
         self.assertEqual(mtime, 1)
         bc = mock.module_bytecode[name][8:]
         self.assertEqual(bc, mock.compile_bc(name))
@@ -370,7 +370,7 @@ class PyPycLoaderTests(PyLoaderTests):
 
 class PyPycLoaderInterfaceTests(unittest.TestCase):
 
-    """Test for the interface of importlib.abc.PyPycLoader."""
+    """Test for the interface of importlib_full.abc.PyPycLoader."""
 
     def get_filename_check(self, src_path, bc_path, expect):
         name = 'mod'
@@ -452,7 +452,7 @@ class RegeneratedBytecodeTests(unittest.TestCase):
         with util.uncache(name):
             mock.load_module(name)
         self.assertTrue(name in mock.module_bytecode)
-        mtime = importlib._r_long(mock.module_bytecode[name][4:8])
+        mtime = importlib_full._r_long(mock.module_bytecode[name][4:8])
         self.assertEqual(mtime, PyPycLoaderMock.default_mtime)
 
 
@@ -575,10 +575,10 @@ class SourceLoaderTestHarness(unittest.TestCase):
 
 class SourceOnlyLoaderTests(SourceLoaderTestHarness):
 
-    """Test importlib.abc.SourceLoader for source-only loading.
+    """Test importlib_full.abc.SourceLoader for source-only loading.
 
     Reload testing is subsumed by the tests for
-    importlib.util.module_for_loader.
+    importlib_full.util.module_for_loader.
 
     """
 
@@ -643,7 +643,7 @@ class SourceOnlyLoaderTests(SourceLoaderTestHarness):
 @unittest.skipIf(sys.dont_write_bytecode, "sys.dont_write_bytecode is true")
 class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
-    """Test importlib.abc.SourceLoader's use of bytecode.
+    """Test importlib_full.abc.SourceLoader's use of bytecode.
 
     Source-only testing handled by SourceOnlyLoaderTests.
 
@@ -732,7 +732,7 @@ class SourceLoaderBytecodeTests(SourceLoaderTestHarness):
 
 class SourceLoaderGetSourceTests(unittest.TestCase):
 
-    """Tests for importlib.abc.SourceLoader.get_source()."""
+    """Tests for importlib_full.abc.SourceLoader.get_source()."""
 
     def test_default_encoding(self):
         # Should have no problems with UTF-8 text.

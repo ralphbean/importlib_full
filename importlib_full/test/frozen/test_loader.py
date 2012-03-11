@@ -1,4 +1,4 @@
-from importlib import machinery
+from importlib_full import machinery
 import imp
 import unittest
 from .. import abc
@@ -93,7 +93,7 @@ class InspectLoaderTests(unittest.TestCase):
         for meth_name in ('get_code', 'get_source', 'is_package'):
             method = getattr(machinery.FrozenImporter, meth_name)
             with self.assertRaises(ImportError):
-                method('importlib')
+                method('importlib_full')
 
 
 def test_main():

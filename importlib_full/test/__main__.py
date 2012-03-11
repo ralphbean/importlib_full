@@ -1,11 +1,11 @@
-"""Run importlib's test suite.
+"""Run importlib_full's test suite.
 
 Specifying the ``--builtin`` flag will run tests, where applicable, with
-builtins.__import__ instead of importlib.__import__.
+builtins.__import__ instead of importlib_full.__import__.
 
 """
-import importlib
-from importlib.test.import_ import util
+import importlib_full
+from importlib_full.test.import_ import util
 import os.path
 from test.support import run_unittest
 import sys
