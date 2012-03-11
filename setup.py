@@ -8,7 +8,7 @@ version_classifiers = ['Programming Language :: Python :: %s' % version
                            '3', '3.0', '3.1', '3.2',
                        ]]
 other_classifiers = [
-    'Development Status :: 5 - Production/Stable',
+    'Development Status :: 3 - Alpha',
     'License :: OSI Approved :: Python Software Foundation License',
 ]
 
